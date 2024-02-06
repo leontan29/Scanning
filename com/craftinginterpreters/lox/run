@@ -1,0 +1,2 @@
+set -x
+java -cp ../../.. com.craftinginterpreters.lox.Lox $*

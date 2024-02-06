@@ -13,6 +13,7 @@ class Scanner {
     private int start = 0;  // index to first char of current token in source[]
     private int current = 0; // index to current char in source[]
     private int line = 1;    // current line
+    private static final Map<String, TokenType> keywords;
 
     Scanner (String source){ 
         this.source = source;
@@ -21,7 +22,7 @@ class Scanner {
     List<Token> scanTokens() {
         while (!isAtEnd()) {
             start = current;
-            scanTokens();
+            scanToken();
         }
 
         tokens.add(new Token(EOF, "", null, line));
@@ -73,29 +74,44 @@ class Scanner {
             line++;
             break;
 
-        default:
-            Lox.error(line, "Unexpected character.");
-            break;
-
-            /* 
         case '"': 
             string(); 
             break;
-
+        
         default: 
             if (isDigit(c)) {
                 number();
+            } else if (isAlpha(c)){
+                identifier();
             } else {
                 Lox.error(line, "Unexpected character.");
             }
-            */
         }
     }
 
-    /*
-    private string() {
+    static {
+        keywords = new HashMap<>();
+        keywords.put("and",    AND);
+        keywords.put("class",  CLASS);
+        keywords.put("else",   ELSE);
+        keywords.put("false",  FALSE);
+        keywords.put("for",    FOR);
+        keywords.put("fun",    FUN);
+        keywords.put("if",     IF);
+        keywords.put("nil",    NIL);
+        keywords.put("or",     OR);
+        keywords.put("print",  PRINT);
+        keywords.put("return", RETURN);
+        keywords.put("super",  SUPER);
+        keywords.put("this",   THIS);
+        keywords.put("true",   TRUE);
+        keywords.put("var",    VAR);
+        keywords.put("while",  WHILE);
+    }
+
+    private void string() {
         while (peek()!= '"' && !isAtEnd()) {
-            if (peek == '\n') return line++;
+            if (peek() == '\n') line++;
             advance();
         }
         if (isAtEnd()) {
@@ -110,9 +126,28 @@ class Scanner {
     }
 
     private void number() {
-        while (isDigit)
+        while (isDigit(peek())) advance();
+        if (peek()=='.' && isDigit(peekNext())) {
+            // Consume the '.'
+            advance();
+        }
+        while (isDigit(peek())) advance();
+        addToken(NUMBER, Double.parseDouble(source.substring(start, current)));
     }
-    */
+
+    private void identifier() {
+        while (isAlphaNumeric(peek())) advance();
+
+        String text = source.substring(start, current);
+        TokenType type = keywords.get(text);
+        if (type != null) {
+            // this is a keyword
+            addToken(type);
+        } else {
+            // this is an identier
+            addToken(IDENTIFIER);
+        }
+    }
 
     private boolean match(char expected){
         if (isAtEnd()) return false;
@@ -127,9 +162,19 @@ class Scanner {
         return source.charAt(current);
     }
 
-    // I get that it's checking if the character is between 0 and 9 
-    // but why is it written this way? shouldn't it be using an if statment 
-    // like 'if c>=0 && c <= 9 then return c?'
+    private char peekNext() {
+        if (current + 1 >= source.length()) return '\0';
+        return source.charAt(current + 1);
+    }
+
+    private boolean isAlpha(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c == '_');
+    }
+
+    private boolean isAlphaNumeric(char c) {
+        return isAlpha(c) || isDigit(c);
+    }
+
     private boolean isDigit(char c) {
         return c >= '0' && c <= '9';
     }
@@ -147,4 +192,5 @@ class Scanner {
         String text = source.substring(start, current);
         tokens.add(new Token(type, text, literal, line));
     }
+
 }
