@@ -2,7 +2,7 @@ package com.craftinginterpreters.lox;
 
 import java.util.List;
 
-class Interpreter implements Expr.Visitor<Object> {
+class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
@@ -17,22 +17,23 @@ class Interpreter implements Expr.Visitor<Object> {
     private Object evaluate(Expr expr) {
 	return expr.accept(this);
     }
-    /*
+    
     private void execute (Stmt stmt) {
 	stmt.accept(this);
     }
 
-    public Void visitExpressionStmt(Stmt.Expression stmt) {
+    @Override
+    public void visitExpressionStmt(Stmt.Expression stmt) {
 	evaluate(stmt.expression);
 	return null;
     }
- 
+
+    @Override
     public void visitPrintStmt(Stmt.Print stmt) {
 	Object value = evaluate(stmt.expression);
 	System.out.println(stringify(value));
 	return null;
     }
-    */
     
     @Override
     public Object visitUnaryExpr(Expr.Unary expr) {
@@ -120,15 +121,17 @@ class Interpreter implements Expr.Visitor<Object> {
 	throw new RuntimeError(operator, "Operands must be numbers.");
     }
 
-    void interpret(Expr expression) {
+    void interpret(List<Stmt> statements) {
 	try {
-	    Object value = evaluate(expression);
-	    System.out.println(stringify(value));
-	} catch (RuntimeError error) {
+	    for (Stmt statement : statements) {
+		execute(statement);
+	    }
+
+	}
+	catch (RuntimeError error) {
 	    Lox.runtimeError(error);
 	}
     }
-
     private String stringify(Object object) {
 	if (object == null) return "nil";
 
