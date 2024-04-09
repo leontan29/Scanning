@@ -23,13 +23,13 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
-    public void visitExpressionStmt(Stmt.Expression stmt) {
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
 	evaluate(stmt.expression);
 	return null;
     }
 
     @Override
-    public void visitPrintStmt(Stmt.Print stmt) {
+    public Void visitPrintStmt(Stmt.Print stmt) {
 	Object value = evaluate(stmt.expression);
 	System.out.println(stringify(value));
 	return null;
@@ -126,12 +126,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	    for (Stmt statement : statements) {
 		execute(statement);
 	    }
-
-	}
-	catch (RuntimeError error) {
+	} catch (RuntimeError error) {
 	    Lox.runtimeError(error);
 	}
     }
+    
     private String stringify(Object object) {
 	if (object == null) return "nil";
 

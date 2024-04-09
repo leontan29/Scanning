@@ -35,6 +35,7 @@ public class GenerateAst {
     private static void defineAst (String outputDir, String baseName,
 				   List<String> types) throws IOException {
 	String path = outputDir + "/" + baseName + ".java";
+	System.out.println("Generating " + path);
 	PrintWriter writer = new PrintWriter(path, "UTF-8");
 
 	writer.println("package com.craftinginterpreters.lox;");
